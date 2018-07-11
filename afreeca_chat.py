@@ -9,7 +9,7 @@ def main():
   method = "POST"
 
   # 여러 data를 보내는데 "bno"만 보내도 가능
-  data = { "bno" : "방송국 숫자 ID 같음" }
+  data = { "bno" : "204995968" }
   
   # Request 보냄
   r = http.request(method, url, fields=data)
