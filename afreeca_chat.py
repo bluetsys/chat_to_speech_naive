@@ -1,4 +1,4 @@
-﻿import urllib3, json
+import urllib3, json
 import websocket, subprocess
 from threading import Timer
 import threading
@@ -16,8 +16,6 @@ def main():
 
   # b"foo bar"임
   result = r.data
-
-
 
   
   # b"foo bar"을 "foo bar"로 바꾸기
