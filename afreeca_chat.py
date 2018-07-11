@@ -8,40 +8,41 @@ def main():
   url = "http://live.afreecatv.com:8057/afreeca/player_live_api.php"
   method = "POST"
 
-  # ì—¬ëŸ¬ dataë¥¼ ë³´ë‚´ëŠ”ë° "bno"ë§Œ ë³´ë‚´ë„ ê°€ëŠ¥
+  # ¿©·¯ data¸¦ º¸³»´Âµ¥ "bno"¸¸ º¸³»µµ °¡´É
   data = { "bno" : "204995968" }
   
-  # Request ë³´ëƒ„
+  # Request º¸³¿
   r = http.request(method, url, fields=data)
 
-  # b"foo bar"ì„
+  # b"foo bar"ÀÓ
   result = r.data
+
   
-  # b"foo bar"ì„ "foo bar"ë¡œ ë°”ê¾¸ê¸°
+  # b"foo bar"À» "foo bar"·Î ¹Ù²Ù±â
   result = result.decode('utf-8')
 
   print(result)
 
-  # ë‚´ê°€ ì„ í˜¸í•˜ëŠ” jsonìœ¼ë¡œ ë°”ê¾¸ê¸°.
+  # ³»°¡ ¼±È£ÇÏ´Â jsonÀ¸·Î ¹Ù²Ù±â.
   result = json.loads(result, encoding='utf-8')
-  # `encoding='utf-8'` parameterë¥¼ ë˜ í•´ì•¼ í•œêµ­ì–´ê°€ ë³´ì„ (ì™œ ì¸ì§€ëŠ” ë”°ë¡œ ì°¾ì•„ë³´ê² ìŒ)
-  # í•˜ì§€ë§Œ í•œêµ­ì–´ë¡œ ëœ ê°’ì„ ì‚¬ìš©í•˜ì§€ëŠ” ì•ŠìŒ. ì˜ˆ) ë°©ì œì™€ BJì´ë¦„ ë“±ë§Œ í•œêµ­ì–´.
+  # `encoding='utf-8'` parameter¸¦ ¶Ç ÇØ¾ß ÇÑ±¹¾î°¡ º¸ÀÓ (¿Ö ÀÎÁö´Â µû·Î Ã£¾Æº¸°ÚÀ½)
+  # ÇÏÁö¸¸ ÇÑ±¹¾î·Î µÈ °ªÀ» »ç¿ëÇÏÁö´Â ¾ÊÀ½. ¿¹) ¹æÁ¦¿Í BJÀÌ¸§ µî¸¸ ÇÑ±¹¾î.
 
-  # í˜•íƒœ { Channel: "ëª¨ë“  ê²ƒ" }
+  # ÇüÅÂ { Channel: "¸ğµç °Í" }
   result = result["CHANNEL"]
 
-  # í•„ìš”í•œ ê°’ë“¤ì€ ë‹¨4ê°œ
+  # ÇÊ¿äÇÑ °ªµéÀº ´Ü4°³
   szChatIp = result["CHIP"]
   szChatPort = result["CHPT"]
   nChatNo = result["CHATNO"]
   szFanTicket = result["FTK"]
 
-  # ë‚˜ë¦„ Classë„ ì¨ë´„
+  # ³ª¸§ Classµµ ½áº½
   cb = WSCallback(szChatIp, szChatPort, nChatNo, szFanTicket)
 
-  # ë³µë¶™. ì—¬ê¸°ì„œ ë¶€í„° Twitchë‘ ë¹„ìŠ·
+  # º¹ºÙ. ¿©±â¼­ ºÎÅÍ Twitch¶û ºñ½Á
   ws = websocket.WebSocketApp("ws://" + szChatIp + ":" + szChatPort + "/Websocket",
-    # ì—†ì–´ë„ ëŒì•„ê°.
+    # ¾ø¾îµµ µ¹¾Æ°¨.
     # subprotocols = ["chat"],
     on_message = cb.on_message,
     on_error = cb.on_error,
@@ -51,24 +52,24 @@ def main():
   ws.run_forever()
 
 def t_on_message(message):
-  # b'blah' ë¥¼ 'blah'
+  # b'blah' ¸¦ 'blah'
   message = message.decode()
 
-  # ì—¬ê¸°ì„œëŠ” json.dumpsì•ˆí•´ë„ ë¨ (ì™œ ì¸ì§€ëŠ” ë”°ë¡œ ì°¾ì•„ë³´ê² ìŒ!)
+  # ¿©±â¼­´Â json.dumps¾ÈÇØµµ µÊ (¿Ö ÀÎÁö´Â µû·Î Ã£¾Æº¸°ÚÀ½!)
   output = subprocess.check_output(['node', '-e', 'require("./afreeca_ws_util.js").readBuffer("{}")'.format(message)])
 
-  # ë‚´ê°€ ì¶”êµ¬í•˜ëŠ” json í˜•ì‹ìœ¼ë¡œ ë°”ê¿ˆ.
-  # outputì€ b'foo bar' í˜•íƒœì„ìœ¼ë¡œ `.decode` ì‚¬ìš©
+  # ³»°¡ Ãß±¸ÇÏ´Â json Çü½ÄÀ¸·Î ¹Ù²Ş.
+  # outputÀº b'foo bar' ÇüÅÂÀÓÀ¸·Î `.decode` »ç¿ë
   output = json.loads(output.decode())
 
-  # ["serviceCode"] ê´€ë ¨í•´ì„œëŠ” ì•„í”„ë¦¬ì¹´ ì¸¡ ì„¸ë¶€ì‚¬í•­
+  # ["serviceCode"] °ü·ÃÇØ¼­´Â ¾ÆÇÁ¸®Ä« Ãø ¼¼ºÎ»çÇ×
   if output["serviceCode"] != 4:
     # print(output)
     if output["serviceCode"] == 5:
       print(output["packet"])
       print(output["packet"][0])
 
-  # ttsëŠ” ì•ˆí•¨. ë¹¨ë¦¬ ëë‚´ê³  ì‹¶ì–´ì„œ íŠ¸ìœ„ì¹˜ë§Œ í–ˆìŒ ã… .ã… 
+  # tts´Â ¾ÈÇÔ. »¡¸® ³¡³»°í ½Í¾î¼­ Æ®À§Ä¡¸¸ ÇßÀ½ ¤Ğ.¤Ğ
 
 class WSCallback():
   def __init__(self, szChatIp, szChatPort, nChatNo, szFanTicket):
@@ -81,7 +82,7 @@ class WSCallback():
     self.util_name = "./afreeca_ws_util.js"
 
   def on_message(self, ws, message):
-    # íŠ¸ìœ„ì¹˜ë‘ ê°™ìŒ
+    # Æ®À§Ä¡¶û °°À½
     threading.Thread(target=t_on_message,args=(message,)).start()
 
   def on_error(self, ws, error):
@@ -95,14 +96,14 @@ class WSCallback():
     print("OPEN")
 
     # KeepAlive --> login --> joinch
-    # afreeca_ws_util ì£¼ì„ ì°¸ê³ 
+    # afreeca_ws_util ÁÖ¼® Âü°í
     msg0 = self.keepAlive()
     msg1 = self.login()
     msg2 = self.joinch()
 
-    # í•œë²ˆì— 3ê°œ ë‹¤ ë³´ë‚´ë©´ ì•ˆë˜ëŠ” ì¤„ ì•Œì•˜ëŠ”ë° ë˜ëŠ”ê²ƒ ê°™ì€ë° ...
-    # (ê·€ì°®ì•„ì„œ ì•ˆ ì§€ìš´ê²ƒì€ ì•„ë‹˜ ^^)
-    # ì§ì ‘ Timer ìˆì´, ì—†ì´ ì‹¤í–‰í•´ë³´ê¸° ì¶”ì²œ!
+    # ÇÑ¹ø¿¡ 3°³ ´Ù º¸³»¸é ¾ÈµÇ´Â ÁÙ ¾Ë¾Ò´Âµ¥ µÇ´Â°Í °°Àºµ¥ ...
+    # (±ÍÂú¾Æ¼­ ¾È Áö¿î°ÍÀº ¾Æ´Ô ^^)
+    # Á÷Á¢ Timer ÀÖÀÌ, ¾øÀÌ ½ÇÇàÇØº¸±â ÃßÃµ!
     Timer(0.5, ws.send, (msg0,)).start()
     Timer(1, ws.send, (msg1,)).start()
     Timer(1.5, ws.send, (msg2,)).start()
