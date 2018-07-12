@@ -8,7 +8,7 @@ def main():
   url = "http://live.afreecatv.com:8057/afreeca/player_live_api.php"
   method = "POST"
 
-  data = { "bno" : "205271786" }
+  data = { "bno" : "205276997" }
   
   r = http.request(method, url, fields=data)
 
